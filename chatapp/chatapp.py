@@ -1,6 +1,7 @@
 import reflex as rx
 
 from chatapp import style
+from chatapp.state import State
 
 def qa(question: str, answer: str) -> rx.Component:
     return rx.box(
@@ -16,21 +17,11 @@ def qa(question: str, answer: str) -> rx.Component:
     )
 
 def chat() -> rx.Component:
-    qa_pairs = [
-        (
-            "What is Reflex?",
-            "A way to build web apps in pure Python!",
-        ),
-        (
-            "What can I make with it?",
-            "Anything from a simple website to a complex web app!",
-        ),
-    ]
     return rx.box(
-        *[
-            qa(question, answer)
-            for question, answer in qa_pairs
-        ]
+        rx.foreach(
+            State.chat_history,
+            lambda messages: qa(messages[0], messages[1]),
+        )
     )
 
 def action_bar() -> rx.Component:
@@ -38,19 +29,40 @@ def action_bar() -> rx.Component:
         rx.hstack(
             rx.form.field(
                 rx.form.label("Message"),
-                rx.form.control(
+                #rx.form.control(
                     rx.input(
-                        style=style.input_style
+                        value=State.question,
+                        on_change=State.set_question,
+                        # style=style.input_style,
                     ),
-                    as_child=True,
-                ),
-                margin_bottom="0",
-                flex_grow="1"
+                #    as_child=True,
+                #),
+                # margin_bottom="0",
+                # flex_grow="1"
             ),
-            rx.button("Send", style=style.button_style),
+            rx.button(
+                "Send",
+                on_click=State.answer,
+                style=style.button_style,
+            ),
             align="end"
         )
     )
+
+# def action_bar() -> rx.Component:
+#     return rx.hstack(
+#         rx.input(
+#             value=State.question,
+#             placeholder="Ask a question",
+#             on_change=State.set_question,
+#             style=style.input_style,
+#         ),
+#         rx.button(
+#             "Ask",
+#             on_click=State.answer,
+#             style=style.button_style,
+#         ),
+#     )
 
 def index() -> rx.Component:
     return rx.center(
